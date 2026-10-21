@@ -1,67 +1,70 @@
 import { Suspense } from 'react'
-import Image from 'next/image'
+import PokemonClientList from './components/PokemonClientList'
 
 interface PokemonListItem {
   name: string;
   url: string;
 }
 
-async function PokemonGrid() {
-  const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
-  if (!res.ok) {
-    throw new Error(`PokeAPI request failed with status ${res.status}`)
+/*
+  Server side data fetcher with retry logic.
+  Handles network failures.
+ */
+async function fetchPokemonList() {
+  const url = 'https://pokeapi.co/api/v2/pokemon?limit=151'
+  const maxAttempts = 3
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    let response: Response
+
+    try {
+      // Fetch data on the server (revalidate every hour)
+      response = await fetch(url, { next: { revalidate: 3600 } })
+    } catch (error) {
+      if (attempt === maxAttempts) throw error
+
+      // Delay before retrying
+      await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
+      continue
+    }
+
+    if (response.ok) {
+      const data = await response.json()
+      const pokemonList: PokemonListItem[] | undefined = data.results
+      if (!pokemonList) throw new Error('PokeAPI returned an invalid Pokémon list')
+      return pokemonList
+    }
+
+    // Only retry on rate limits or server errors
+    const shouldRetry = response.status === 429 || response.status >= 500
+    if (!shouldRetry || attempt === maxAttempts) {
+      throw new Error(`PokeAPI request failed with status ${response.status}`)
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
   }
 
-  const data = await res.json()
-  const pokemonList: PokemonListItem[] | undefined = data.results
-  if (!pokemonList) {
-    throw new Error('PokeAPI returned an invalid Pokémon list')
-  }
-
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-7xl mx-auto">
-      {pokemonList.map((pokemon, index) => {
-        const id = index + 1
-        const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
-        return (
-          <div key={pokemon.name} className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center hover:shadow-xl hover:opacity-80 transition-shadow cursor-pointer border border-gray-100">
-            <span className="text-xs text-gray-400 font-semibold self-end">
-              #{String(id).padStart(3, '0')}
-            </span>
-            <div className="w-24 h-24 relative my-2">
-              <Image
-                src={imageUrl}
-                alt={pokemon.name}
-                fill
-                sizes="96px"
-                className="object-contain"
-              />
-            </div>
-            <h2 className="capitalize font-pokemon font-bold text-gray-700 mt-2">
-              {pokemon.name}
-            </h2>
-          </div>
-        )
-      })}
-    </div>
-  )
+  throw new Error('PokeAPI request failed after multiple attempts')
 }
 
-export default function Home() {
+/*
+  Main Home.
+  Fetches the dataon the server and passes it to the client list.
+*/
+export default async function Home() {
+  const pokemonList = await fetchPokemonList()
+
   return (
     <main className="min-h-screen p-8 bg-teal-600">
-      <h1 className="font-pokemon text-4xl font-extrabold text-center mb-8 text-gray-800">
-        Pokedex (Gen 1)
-      </h1>
-
+      {/* Suspense boundary catches loading states */}
       <Suspense
         fallback={
-          <p className="font-pokemon text-center text-gray-900" role="status">
-            Loading Pokemon...
+          <p className="font-pokemon text-center text-white" role="status">
+            Loading Pokémon...
           </p>
         }
       >
-        <PokemonGrid />
+        <PokemonClientList initialPokemon={pokemonList} />
       </Suspense>
     </main>
   )
