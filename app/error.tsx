@@ -23,7 +23,7 @@ export default function Error({
         try again.
       </p>
       <button
-        onClick={reset}
+        onClick={() => window.location.reload()}
         className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
       >
         Try again
