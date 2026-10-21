@@ -59,9 +59,14 @@ export default async function Home() {
       {/* Suspense boundary catches loading states */}
       <Suspense
         fallback={
-          <p className="font-pokemon text-center text-white" role="status">
-            Loading Pokémon...
-          </p>
+          <div>
+            <h1 className="font-pokemon text-3xl md:text-4xl font-extrabold text-center mb-4 text-white drop-shadow-md">
+              Pokédex (Gen 1)
+            </h1>
+            <p className="font-pokemon text-center text-white" role="status">
+              Loading Pokémon...
+            </p>
+          </div>
         }
       >
         <PokemonClientList initialPokemon={pokemonList} />
