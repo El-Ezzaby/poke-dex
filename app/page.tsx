@@ -29,7 +29,13 @@ async function PokemonGrid() {
               #{String(id).padStart(3, '0')}
             </span>
             <div className="w-24 h-24 relative my-2">
-              <Image src={imageUrl} alt={pokemon.name} fill className="object-contain" />
+              <Image
+                src={imageUrl}
+                alt={pokemon.name}
+                fill
+                sizes="96px"
+                className="object-contain"
+              />
             </div>
             <h2 className="capitalize font-pokemon font-bold text-gray-700 mt-2">
               {pokemon.name}
@@ -50,7 +56,7 @@ export default function Home() {
 
       <Suspense
         fallback={
-          <p className="text-center text-gray-900" role="status">
+          <p className="font-pokemon text-center text-gray-900" role="status">
             Loading Pokemon...
           </p>
         }
