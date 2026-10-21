@@ -1,6 +1,6 @@
 'use client' // Marks this as a Client Component to enable hooks like useState and browser event listeners
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 
 // TypeScript interface defining the shape of each Pokémon item from the API
@@ -14,6 +14,9 @@ interface PokemonClientListProps {
 }
 
 export default function PokemonClientList({ initialPokemon }: PokemonClientListProps) {
+  //Snap the text cursor back to the search bar after clicking clear search button
+  const inputRef = useRef<HTMLInputElement>(null)
+
   // State to track what the user types into the search bar
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -30,8 +33,10 @@ export default function PokemonClientList({ initialPokemon }: PokemonClientListP
           Pokédex (Gen 1)
         </h1>
 
-        <div className="flex justify-center">
+        <div className="relative w-full max-w-md mx-auto">
           <input
+            //focuses the text cursor to search bar after clear search click
+            ref={inputRef}
             type="text"
             placeholder="SEARCH POKEMON..."
             value={searchQuery}
@@ -39,6 +44,19 @@ export default function PokemonClientList({ initialPokemon }: PokemonClientListP
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full max-w-md px-4 py-3 rounded-xl bg-white/90 text-gray-800 placeholder-gray-400 font-pokemon text-xs shadow-md focus:outline-none focus:ring-4 focus:ring-yellow-400 transition-all border border-gray-200"
           />
+
+          {/* Quick clear button "X" */}
+          {searchQuery && (
+            <button onClick={() => {
+              setSearchQuery('')
+              inputRef.current?.focus()
+            }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold font-pokemon text-sm px-1 cursor-pointer"
+                    title="clear saerch"
+            >
+              X
+            </button>
+          )}
         </div>
       </div>
 
