@@ -24,7 +24,7 @@ async function PokemonGrid() {
         const id = index + 1
         const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
         return (
-          <div key={pokemon.name} className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center hover:shadow-xl hover:opacity-80 transition-shadow curser-pointer border border-gray-100">
+          <div key={pokemon.name} className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center hover:shadow-xl hover:opacity-80 transition-shadow cursor-pointer border border-gray-100">
             <span className="text-xs text-gray-400 font-semibold self-end">
               #{String(id).padStart(3, '0')}
             </span>
