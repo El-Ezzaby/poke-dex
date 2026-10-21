@@ -24,14 +24,14 @@ async function PokemonGrid() {
         const id = index + 1
         const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
         return (
-          <div key={pokemon.name} className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center hover:shadow-xl transition-shadow curser-pointer border border-gray-100">
+          <div key={pokemon.name} className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center hover:shadow-xl hover:opacity-80 transition-shadow curser-pointer border border-gray-100">
             <span className="text-xs text-gray-400 font-semibold self-end">
               #{String(id).padStart(3, '0')}
             </span>
             <div className="w-24 h-24 relative my-2">
               <Image src={imageUrl} alt={pokemon.name} fill className="object-contain" />
             </div>
-            <h2 className="capitalize font-bold text-gray-700 mt-2">
+            <h2 className="capitalize font-pokemon font-bold text-gray-700 mt-2">
               {pokemon.name}
             </h2>
           </div>
@@ -43,14 +43,14 @@ async function PokemonGrid() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <h1 className="text-4xl font-extrabold text-center mb-8 text-gray-800">
+    <main className="min-h-screen p-8 bg-teal-600">
+      <h1 className="font-pokemon text-4xl font-extrabold text-center mb-8 text-gray-800">
         Pokedex (Gen 1)
       </h1>
 
       <Suspense
         fallback={
-          <p className="text-center text-gray-500" role="status">
+          <p className="text-center text-gray-900" role="status">
             Loading Pokemon...
           </p>
         }
