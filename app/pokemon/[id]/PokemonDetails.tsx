@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+// The fields from PokeAPI that the detail view displays.
 interface PokemonDetail {
   id: number
   name: string
@@ -30,6 +31,8 @@ interface PokemonDetail {
   }[]
 }
 
+// Fetch from the browser so the request uses the same network path as the user.
+// Retry network failures, rate limits, and server errors up to three attempts.
 async function fetchPokemon(id: string, signal: AbortSignal): Promise<PokemonDetail> {
   const maxAttempts = 3
 
@@ -60,6 +63,7 @@ async function fetchPokemon(id: string, signal: AbortSignal): Promise<PokemonDet
 }
 
 export default function PokemonDetails({ id }: { id: string }) {
+  // Associate each result with the Pokémon and retry attempt that requested it.
   const [result, setResult] = useState<{
     requestKey: string
     pokemon?: PokemonDetail
@@ -69,6 +73,7 @@ export default function PokemonDetails({ id }: { id: string }) {
   const requestKey = `${id}-${retryCount}`
 
   useEffect(() => {
+    // Cancel any request if the Pokémon changes or the component unmounts.
     const controller = new AbortController()
 
     fetchPokemon(id, controller.signal)
@@ -80,6 +85,7 @@ export default function PokemonDetails({ id }: { id: string }) {
     return () => controller.abort()
   }, [id, requestKey])
 
+  // Ignore stale results while a request for the current ID is pending.
   const isCurrentResult = result.requestKey === requestKey
   const pokemon = isCurrentResult ? result.pokemon : undefined
   const error = isCurrentResult && result.error
@@ -116,12 +122,14 @@ export default function PokemonDetails({ id }: { id: string }) {
 
   return (
     <main className="min-h-screen bg-teal-600 p-8 flex flex-col items-center">
+      {/* Navigation back to the Pokémon grid. */}
       <div className="mb-6 w-full max-w-2xl">
         <Link href="/" className="inline-block rounded-xl bg-white/90 px-4 py-2 font-pokemon text-xs text-gray-800 shadow-md transition-all hover:bg-white">
           ← Back to Pokedex
         </Link>
       </div>
 
+      {/* Pokémon identity, artwork, physical attributes and base stats. */}
       <div className="flex w-full max-w-2xl flex-col items-center gap-8 rounded-2xl border border-gray-100 bg-white p-8 md:flex-row">
         <div className="flex flex-col items-center">
           <span className="mb-2 font-pokemon text-sm font-bold text-gray-400">
