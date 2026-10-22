@@ -49,7 +49,7 @@ poke-dex/
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone <https://github.com/El-Ezzaby/poke-dex>
 cd poke-dex
 ```
 
