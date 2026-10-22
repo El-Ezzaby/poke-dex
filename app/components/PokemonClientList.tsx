@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 // TypeScript interface defining the shape of each Pokémon item from the API
 interface PokemonListItem {
@@ -76,8 +77,9 @@ export default function PokemonClientList({ initialPokemon }: PokemonClientListP
               const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
 
               return (
-                <div
+                <Link
                   key={pokemon.name}
+                  href={`/pokemon/${id}`}
                   className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center hover:shadow-xl hover:scale-105 transition-all cursor-pointer border border-gray-100"
                 >
                   {/* Formatted Pokédex Number */}
@@ -100,7 +102,7 @@ export default function PokemonClientList({ initialPokemon }: PokemonClientListP
                   <h2 className="capitalize font-pokemon font-bold text-gray-700 mt-2 text-xs text-center">
                     {pokemon.name}
                   </h2>
-                </div>
+                </Link>
               )
             })}
           </div>
