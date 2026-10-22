@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import PokemonClientList from './components/PokemonClientList'
+import { fetchWithRetry } from './lib/api-error'
 
 interface PokemonListItem {
   name: string;
@@ -7,49 +8,19 @@ interface PokemonListItem {
 }
 
 /*
-  Server side data fetcher with retry logic.
-  Handles network failures.
+  Fetches the first 151 Pokémon on the server using the shared retry and cache
+  behavior, then validates the list before passing it to the client grid.
  */
 async function fetchPokemonList() {
   const url = 'https://pokeapi.co/api/v2/pokemon?limit=151'
-  const maxAttempts = 3
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    let response: Response
-
-    try {
-      // Fetch data on the server (revalidate every hour)
-      response = await fetch(url, { next: { revalidate: 3600 } })
-    } catch (error) {
-      if (attempt === maxAttempts) throw error
-
-      // Delay before retrying
-      await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
-      continue
-    }
-
-    if (response.ok) {
-      const data = await response.json()
-      const pokemonList: PokemonListItem[] | undefined = data.results
-      if (!pokemonList) throw new Error('PokeAPI returned an invalid Pokémon list')
-      return pokemonList
-    }
-
-    // Only retry on rate limits or server errors
-    const shouldRetry = response.status === 429 || response.status >= 500
-    if (!shouldRetry || attempt === maxAttempts) {
-      throw new Error(`PokeAPI request failed with status ${response.status}`)
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
-  }
-
-  throw new Error('PokeAPI request failed after multiple attempts')
+  const data = await fetchWithRetry<{ results?: PokemonListItem[] }>(url)
+  if (!data.results) throw new Error('PokeAPI returned an invalid Pokémon list')
+  return data.results
 }
 
 /*
   Main Home.
-  Fetches the dataon the server and passes it to the client list.
+  Fetches the data on the server and passes it to the client list.
 */
 export default async function Home() {
   const pokemonList = await fetchPokemonList()
